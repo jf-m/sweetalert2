@@ -40,6 +40,9 @@ function removePopupAndResetState (container, onAfterClose) {
     undoIEfix()
     unsetAriaHidden()
   }
+  privateProps.innerParams = new WeakMap();
+  privateProps.domCache = new WeakMap();
+  privateMethods.swalPromiseResolve = new WeakMap();
 }
 
 function swalCloseEventFinished (popup, container, onAfterClose) {
@@ -78,6 +81,10 @@ export function close (resolveValue) {
 
   // Resolve Swal promise
   swalPromiseResolve(resolveValue || {})
+
+  if (privateProps.promise.get(this)) {
+    privateProps.promise.delete(this)
+  }
 }
 
 const triggerOnAfterClose = (onAfterClose) => {
