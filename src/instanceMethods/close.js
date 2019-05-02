@@ -14,8 +14,12 @@ import privateMethods from '../privateMethods.js'
 function removePopupAndResetState (container, onAfterClose) {
   if (!dom.isToast()) {
     restoreActiveElement().then(() => triggerOnAfterClose(onAfterClose))
-    globalState.keydownTarget.removeEventListener('keydown', globalState.keydownHandler, { capture: globalState.keydownListenerCapture })
+    if (globalState.keydownTarget) {
+      globalState.keydownTarget.removeEventListener('keydown', globalState.keydownHandler, {capture: globalState.keydownListenerCapture})
+      globalState.keydownTarget = null
+    }
     globalState.keydownHandlerAdded = false
+    globalState.keydownHandler = null
   } else {
     triggerOnAfterClose(onAfterClose)
   }
@@ -40,9 +44,9 @@ function removePopupAndResetState (container, onAfterClose) {
     undoIEfix()
     unsetAriaHidden()
   }
-  privateProps.innerParams = new WeakMap();
-  privateProps.domCache = new WeakMap();
-  privateMethods.swalPromiseResolve = new WeakMap();
+  privateProps.innerParams = new WeakMap()
+  privateProps.domCache = new WeakMap()
+  privateMethods.swalPromiseResolve = new WeakMap()
 }
 
 function swalCloseEventFinished (popup, container, onAfterClose) {
@@ -85,6 +89,16 @@ export function close (resolveValue) {
   if (privateProps.promise.get(this)) {
     privateProps.promise.delete(this)
   }
+
+  // Dispose of this.params
+  Object.defineProperties(this, {
+    params: {
+      value: {},
+      writable: false,
+      enumerable: true,
+      configurable: true
+    }
+  })
 }
 
 const triggerOnAfterClose = (onAfterClose) => {
